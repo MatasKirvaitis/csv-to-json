@@ -26,11 +26,13 @@ export default async function startClient() {
     const outputFile = (await consoleRead.question('Please enter output CSV file name\n')).split('.')[0];
     const headerFlag = await consoleRead.question('Does the CSV file contain headers? (true/false)\n');
     const loggerFlag = await consoleRead.question('Should the logger log to console (true) or file (false)?\n');
+    const dbFlag = await consoleRead.question('Do you want the logs to be save to DB? (true/false)\n');
 
     message.push(inputFile);
     message.push(outputFile);
     headerFlag === 'true' ? message.push(headerFlag) : message.push('false');
     loggerFlag === 'true' ? message.push(loggerFlag) : message.push('false');
+    dbFlag === 'true' ? message.push(dbFlag) : message.push('false');
 
     const req = http.request(options);
     req.end();

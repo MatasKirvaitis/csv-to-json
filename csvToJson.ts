@@ -3,14 +3,14 @@ import { argv } from 'node:process'
 import readline from 'readline';
 import Logger from './logger'
 
-export default function csvToJSON(inputFileName: string, outputFileName: string, headerFlag: boolean, loggerFlag: boolean) {
+export default function csvToJSON(inputFileName: string, outputFileName: string, headerFlag: boolean, loggerFlag: boolean, dbFlag: boolean) {
     const args: string[] = argv.splice(2);
     let headerLine: boolean = true;
     let headers: string[] = [];
     let firstLine = true;
     let lineCounter: number = 0;
 
-    const logger = new Logger('csvToJSON', loggerFlag);
+    const logger = new Logger('csvToJSON', loggerFlag, dbFlag);
 
     logger.info('App started');
 

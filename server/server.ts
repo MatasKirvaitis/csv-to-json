@@ -7,7 +7,9 @@ import 'dotenv/config';
 const port = 1337;
 
 export default async function startServer() {
-    const logger = new Logger('Server', process.env.LOG_TO_CONSOLE === 'false' ? false : true);
+    const logger = new Logger('Server',
+        process.env.LOG_TO_CONSOLE === 'false' ? false : true,
+        process.env.SAVE_TO_DB === 'true' ? true : false);
 
     const server = http.createServer((request, response) => {
         if (request.method === 'POST' && request.headers['content-type'] === 'text/csv') {
@@ -26,7 +28,7 @@ export default async function startServer() {
                     if (err) {
                         response.writeHead(500, { 'Content-Type': 'text/plain'});
                         response.end('File saving failed');
-                        logger.log('ERROR', err.message);
+                        logger.error(err.message);
                     }
                 });
             })
@@ -61,12 +63,13 @@ export default async function startServer() {
 
             const config = data.toString().split(' ');
 
-            if(config.length === 4) {
+            if(config.length === 5) {
                 csvToJSON(
                     config[0],
                     config[1],
                     config[2] === 'false' ? false : true,
-                    config[3] === 'false' ? false : true);
+                    config[3] === 'false' ? false : true,
+                    config[4] === 'true' ? true : false);
             } else {
                 logger.log('ERROR', 'Incorrect argument number received in message');
             }

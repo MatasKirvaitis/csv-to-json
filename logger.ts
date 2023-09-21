@@ -21,7 +21,7 @@ export default class Logger {
         this.logService = new LogService();
     }
 
-    log(level: string, message: string) {
+    private log(level: string, message: string) {
         const timestamp = new Date();
         const output = `${timestamp.toISOString()} [${this.name}] [${level}] ${message}`;
 

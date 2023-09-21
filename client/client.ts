@@ -37,13 +37,13 @@ export default async function startClient() {
     const req = http.request(options);
     req.end();
 
-    logger.log('INFO', 'Client sent upgrade request');
+    logger.info('Client sent upgrade request');
 
     req.on('upgrade', (res, socket, upgradeHead) => {
-        logger.log('INFO', 'Connection upgraded to Websocket');
+        logger.info('Connection upgraded to Websocket');
 
         socket.write(message.join(' '));
     }).on('error', err => {
-        logger.log('ERROR', err.message);
+        logger.error(err.message);
     });;
 }

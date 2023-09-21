@@ -36,15 +36,15 @@ export default async function startServer() {
                 writeStream.close();
                 response.writeHead(200, { 'Content-Type': 'text/plain'});
                 response.end('File saved successfully');
-                logger.log('INFO', 'File saved successfully');
+                logger.info('File saved successfully');
             })
             .on('error', err => {
-                logger.log('ERROR', err.message);
+                logger.error(err.message);
             });
         } else {
             response.writeHead(400, { 'Content-Type': 'text/plain'});
             response.end('Send a POST request with a CSV file using Content-Type: text/csv');
-            logger.log('ERROR', 'Server rejected HTTP request because of incorrect method or Content-Type');
+            logger.error('Server rejected HTTP request because of incorrect method or Content-Type');
         }
     });
 
@@ -59,7 +59,7 @@ export default async function startServer() {
         socket.write(headers);
 
         socket.on('data', data => {
-            logger.log('INFO', `Server received message: ${data}`);
+            logger.info(`Server received message: ${data}`);
 
             const config = data.toString().split(' ');
 
@@ -71,14 +71,14 @@ export default async function startServer() {
                     config[3] === 'false' ? false : true,
                     config[4] === 'true' ? true : false);
             } else {
-                logger.log('ERROR', 'Incorrect argument number received in message');
+                logger.error('Incorrect argument number received in message');
             }
         });
 
-        socket.on('end', () => { logger.log('INFO', 'Client Disconnected') });
+        socket.on('end', () => { logger.info('Client Disconnected') });
     }).on('error', err => {
-        logger.log('ERROR', err.message);
+        logger.error(err.message);
     });
 
-    server.listen(port, () => logger.log('INFO', `Server running on port ${port}`));
+    server.listen(port, () => logger.info(`Server running on port ${port}`));
 }

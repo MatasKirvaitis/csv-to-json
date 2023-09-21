@@ -4,8 +4,6 @@ import 'dotenv/config';
 import { AppDataSource } from './datasource';
 import { DataSource } from 'typeorm';
 
-//incorrect logger method used in most places, need to recheck
-
 (async () => {
     //Add Docker Compose.
     try {

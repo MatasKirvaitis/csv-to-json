@@ -3,7 +3,7 @@ import { argv } from 'node:process'
 import readline from 'readline';
 import Logger from './logger'
 
-export default function csvToJSON(inputFileName: string, outputFileName: string, headerFlag: boolean, loggerFlag: boolean, dbFlag: boolean) {
+export default function csvToJSON(inputFileName: string, outputFileName: string, headerFlag: boolean, loggerFlag: boolean = true, dbFlag: boolean = true) {
     const args: string[] = argv.splice(2);
     let headerLine: boolean = true;
     let headers: string[] = [];

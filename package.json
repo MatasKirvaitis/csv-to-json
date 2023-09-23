@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node index.ts",
-    "typeorm": "typeorm-ts-node-esm"
+    "migration-run": "typeorm-ts-node-esm migration:run -d datasource.ts"
   },
   "author": "",
   "license": "ISC",

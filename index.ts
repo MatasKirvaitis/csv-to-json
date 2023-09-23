@@ -5,7 +5,6 @@ import { AppDataSource } from './datasource';
 import { DataSource } from 'typeorm';
 
 (async () => {
-    //Add Docker Compose.
     try {
         const tempDataSource = new DataSource ({
             type: 'postgres',

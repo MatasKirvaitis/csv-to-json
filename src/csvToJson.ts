@@ -1,7 +1,7 @@
 import fs from 'fs';
-import { argv } from 'node:process'
+import { argv } from 'node:process';
 import readline from 'readline';
-import Logger from './logger'
+import Logger from './logger';
 
 export default function csvToJSON(inputFileName: string, outputFileName: string, headerFlag: boolean, loggerFlag: boolean = true, dbFlag: boolean = true): Promise<boolean> {
     return new Promise((resolve) => {
@@ -36,40 +36,40 @@ export default function csvToJSON(inputFileName: string, outputFileName: string,
             writer.write('[');
 
             reader
-            .on('line', (line) => {
-                if (headerLine && headerFlag) {
-                    headers = parseCSV(line);
-                    headerLine = false;
-                }else if (headers.length === 0) {
-                    for (let i = 0; i < line.length; i++) {
-                        headers[i] = `Column ${i}`;
-                    }
-                    if (firstLine) {
-                        lineCounter += 1;
-                        writer.write(convertToJSONObject(line, headers));
-                        firstLine = false;
+                .on('line', (line) => {
+                    if (headerLine && headerFlag) {
+                        headers = parseCSV(line);
+                        headerLine = false;
+                    } else if (headers.length === 0) {
+                        for (let i = 0; i < line.length; i++) {
+                            headers[i] = `Column ${i}`;
+                        }
+                        if (firstLine) {
+                            lineCounter += 1;
+                            writer.write(convertToJSONObject(line, headers));
+                            firstLine = false;
+                        } else {
+                            lineCounter += 1;
+                            writer.write(', ' + convertToJSONObject(line, headers));
+                        }
                     } else {
-                        lineCounter += 1;
-                        writer.write(', ' + convertToJSONObject(line, headers));
+                        if (firstLine) {
+                            lineCounter += 1;
+                            writer.write(convertToJSONObject(line, headers));
+                            firstLine = false;
+                        } else {
+                            lineCounter += 1;
+                            writer.write(', ' + convertToJSONObject(line, headers));
+                        }
                     }
-                } else {
-                    if (firstLine) {
-                        lineCounter += 1;
-                        writer.write(convertToJSONObject(line, headers));
-                        firstLine = false;
-                    } else {
-                        lineCounter += 1;
-                        writer.write(', ' + convertToJSONObject(line, headers));
-                    }
-                }
-            })
-            .on('close', () => {
-                writer.write(']');
-                writer.close();
-                logger.info(`Converted ${lineCounter} lines from CSV`)
-                logger.info('App closed');
-                resolve(true);
-            });
+                })
+                .on('close', () => {
+                    writer.write(']');
+                    writer.close();
+                    logger.info(`Converted ${lineCounter} lines from CSV`)
+                    logger.info('App closed');
+                    resolve(true);
+                });
         } catch (err) {
             if (err instanceof Error) {
                 logger.error(err.message);
@@ -81,9 +81,9 @@ export default function csvToJSON(inputFileName: string, outputFileName: string,
 }
 
 function convertToJSONObject(fileContents: string, headers: string[] = []) {
-    const obj: {[key: string] : string | number} = {};
+    const obj: { [key: string]: string | number } = {};
     let row: string[] = [];
-    
+
     row = parseCSV(fileContents);
 
     headers.map((headerName, stringIndex) => {
@@ -107,7 +107,7 @@ function parseCSV(csvLine: string) {
         }
 
         if (inQuotes && csvLine[currentPos] === '"') {
-            if (csvLine[currentPos + 1] ==='"') {
+            if (csvLine[currentPos + 1] === '"') {
                 chunk += '\'';
                 currentPos += 2;
                 continue;

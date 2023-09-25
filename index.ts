@@ -5,7 +5,7 @@ import { DataSource } from 'typeorm';
 
 (async () => {
     try {
-        const tempDataSource = new DataSource ({
+        const tempDataSource = new DataSource({
             type: 'postgres',
             host: process.env.PG_HOST,
             port: Number(process.env.PG_PORT),
@@ -13,9 +13,9 @@ import { DataSource } from 'typeorm';
             password: process.env.PG_PASSWORD,
             database: 'postgres',
         });
-    
+
         await tempDataSource.initialize();
-    
+
         const dbExists = await tempDataSource.query(
             `SELECT datname FROM pg_database WHERE datname='${process.env.PG_DATABASE}'`
         );
@@ -31,7 +31,7 @@ import { DataSource } from 'typeorm';
         console.log('Data Source Initialized');
 
         startServer();
-    } catch(err) {
+    } catch (err) {
         if (err instanceof Error) {
             console.log(err.message);
         } else {

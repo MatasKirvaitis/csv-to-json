@@ -8,7 +8,7 @@ export class File {
     @Column()
     url!: string
 
-    @CreateDateColumn({type: 'timestamptz'})
+    @CreateDateColumn({ type: 'timestamptz' })
     timestamp!: Date;
 }
 

@@ -14,7 +14,7 @@ export default class FileService {
             .createQueryBuilder()
             .select('file')
             .from(File, 'file')
-            .where('file.url LIKE :url', {url: `%${params.url}%`})
+            .where('file.url LIKE :url', { url: `%${params.url}%` })
             .getMany();
     }
 

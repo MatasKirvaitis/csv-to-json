@@ -36,7 +36,9 @@ Client portion will prompt you for the following arguments one by one:
 To convert another file via client, the client can be stopped using Ctrl + C and launched again.
 
 ## Postman
-Optionally, the file can also be passed to the application via Postman using POST method for the URL 'http://localhost:1337/upload?headers=\<true or false>&&file=\<file name to use>'.
+Optionally, the file can also be passed to the application via Postman.
+
+Using POST method for the URL `http://localhost:1337/upload?headers=<true or false>&&file=<file name to use>`.
 
 Headers and name arguments are optional, headers will be set to false by default and a random default file name will be generated.
 

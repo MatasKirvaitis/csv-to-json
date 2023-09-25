@@ -1,4 +1,3 @@
-import startClient from './src/client/client';
 import startServer from './src/server/server';
 import 'dotenv/config';
 import { AppDataSource } from './src/datasource';
@@ -32,7 +31,6 @@ import { DataSource } from 'typeorm';
         console.log('Data Source Initialized');
 
         startServer();
-        startClient();
     } catch (err) {
         if (err instanceof Error) {
             console.log(err.message);

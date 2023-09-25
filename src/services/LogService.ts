@@ -1,12 +1,11 @@
 import { AppDataSource } from '../datasource';
-import { Log, LogDTO } from '../entities/Log';
+import { Log, createDTO } from '../entities/Log';
 import { DeleteResult, UpdateResult } from 'typeorm';
 
 export default class LogService {
-
     private logRepository = AppDataSource.getRepository(Log);
 
-    async create(log: LogDTO): Promise<Log> {
+    async create(log: createDTO): Promise<Log> {
         return this.logRepository.save(log);
     }
 

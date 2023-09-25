@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, Timestamp } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
 export class Log {
@@ -21,7 +21,7 @@ export class Log {
     timestamp!: Date;
 }
 
-export interface LogDTO {
+export interface createDTO {
     appName: string;
     level: string;
     message: string;

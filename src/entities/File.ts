@@ -8,15 +8,14 @@ export class File {
     @Column()
     url!: string
 
-    @CreateDateColumn('timestamptz')
+    @CreateDateColumn({type: 'timestamptz'})
     timestamp!: Date;
 }
 
-export interface updateDTO {
+export interface createDTO {
     url: string;
-    timestamp: Date;
 }
 
-export interface createDTO {
+export interface findByUrlDTO {
     url: string;
 }

@@ -17,23 +17,29 @@ csv-to-json is a simple application to convert CSV files to JSON.
      PG_USER - PSQL user's username
      PG_PASSWORD - PSQL user's password
      PG_DATABASE - PSQL database name
-7. Place CSV file you want to convert into filesInput.
+7. Place CSV file you want to convert into "filesInput".
 8. In terminal run: docker-compose up
 9. Verify database was launched successfully.
 10. Run the latest migration using: npm run migration-run
 11. Verify migration successfully runs.
-12. To start the application use the command: npm run start
+12. To start the application use the commands:
+         npm run start-server - This starts the server portion of the application, enough to convert files via Postman
+         npm run start-client - This starts the client that prompts the user various arguments to run the conversion, server needs to be running for this to work
 
-The application will prompt you for the following arguments one by one:
+Client portion will prompt you for the following arguments one by one:
   1. CSV input file name.
   2. JSON output file name.
   3. Whether headers are present in the CSV file (true/false).
   4. Whether the logger should log to console (true) or file (false).
   5. Whether logs should be saved to database (true/false).
 
-To convert another file the application can be stopped using Ctrl + C and launched again.
+To convert another file via client, the client can be stopped using Ctrl + C and launched again.
 
 ## Postman
-Optionally, the file can also be passed to the application via Postman using POST method for the URL 'http://localhost:1337/\<file name here\>'.
+Optionally, the file can also be passed to the application via Postman using POST method for the URL 'http://localhost:1337/upload?headers=\<true or false>&&file=\<file name to use>'.
 
-File will be saved in folder "filesInput" with the name that is passed in the URL.
+Headers and name arguments are optional, headers will be set to false by default and a random default file name will be generated.
+
+File will be saved in folder "filesInput" with the name that is passed as argument in URL and also converted file will be saved in "filesOutput".
+
+After sending the file you will receive a response with a link you can download the converted file from.

@@ -10,6 +10,7 @@ export default class LogService {
     }
 
     async findAll(): Promise<Log[]> {
+    async findAll(): Promise<Log[]> {
         return this.logRepository.find();
     }
 

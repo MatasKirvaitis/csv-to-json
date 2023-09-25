@@ -17,7 +17,7 @@ const consoleRead = readline.createInterface({
     output: process.stdout,
 });
 
-export default async function startClient() {
+(async function startClient() {
     const message: string[] = [];
 
     const logger = new Logger('Client', process.env.LOG_TO_CONSOLE === 'false' ? false : true);
@@ -46,4 +46,4 @@ export default async function startClient() {
     }).on('error', err => {
         logger.error(err.message);
     });;
-}
+})();

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import LogService from './src/services/LogService';
+import LogService from './services/LogService';
 
 export default class Logger {
     cache: string;
@@ -11,7 +11,7 @@ export default class Logger {
     dbFlag: boolean;
     logService: LogService;
 
-    constructor(name:string, consoleFlag = true, dbFlag = false, dir = './logs') {
+    constructor(name: string, consoleFlag = true, dbFlag = false, dir = './logs') {
         this.dir = dir;
         this.cache = '';
         this.consoleFlag = consoleFlag;
@@ -34,10 +34,10 @@ export default class Logger {
         }
 
         if (this.dbFlag) {
-            this.logService.create({appName: this.name, level: level, message: message, timestamp: timestamp});
+            this.logService.create({ appName: this.name, level: level, message: message, timestamp: timestamp });
         }
     }
 
-    info(message: string) {this.log('INFO', message);}
-    error(message: string) {this.log('ERROR', message);}
+    info(message: string) { this.log('INFO', message); }
+    error(message: string) { this.log('ERROR', message); }
 }

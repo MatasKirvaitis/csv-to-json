@@ -21,7 +21,7 @@ export class Log {
     timestamp!: Date;
 }
 
-export interface LogDTO {
+export interface createDTO {
     appName: string;
     level: string;
     message: string;

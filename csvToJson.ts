@@ -3,78 +3,81 @@ import { argv } from 'node:process'
 import readline from 'readline';
 import Logger from './logger'
 
-export default function csvToJSON(inputFileName: string, outputFileName: string, headerFlag: boolean, loggerFlag: boolean = true, dbFlag: boolean = true) {
-    const args: string[] = argv.splice(2);
-    let headerLine: boolean = true;
-    let headers: string[] = [];
-    let firstLine = true;
-    let lineCounter: number = 0;
+export default function csvToJSON(inputFileName: string, outputFileName: string, headerFlag: boolean, loggerFlag: boolean = true, dbFlag: boolean = true): Promise<boolean> {
+    return new Promise((resolve) => {
+        const args: string[] = argv.splice(2);
+        let headerLine: boolean = true;
+        let headers: string[] = [];
+        let firstLine = true;
+        let lineCounter: number = 0;
 
-    const logger = new Logger('csvToJSON', loggerFlag, dbFlag);
+        const logger = new Logger('csvToJSON', loggerFlag, dbFlag);
 
-    logger.info('App started');
+        logger.info('App started');
 
-    try {
-        const stream = fs.createReadStream(`./filesInput/${inputFileName}.csv`);
+        try {
+            const stream = fs.createReadStream(`./filesInput/${inputFileName}.csv`);
 
-        stream.on('error', (err) => {
-            logger.error(err.message);
-        });
+            stream.on('error', (err) => {
+                logger.error(err.message);
+            });
 
-        const reader = readline.createInterface({
-            input: stream,
-            crlfDelay: Infinity
-        });
+            const reader = readline.createInterface({
+                input: stream,
+                crlfDelay: Infinity
+            });
 
-        logger.info(`Input file set to: ${inputFileName}.csv`);
+            logger.info(`Input file set to: ${inputFileName}.csv`);
 
-        const writer = fs.createWriteStream(`./filesOutput/${outputFileName}.json`);
+            const writer = fs.createWriteStream(`./filesOutput/${outputFileName}.json`);
 
-        logger.info(`Output file set to: ${outputFileName}.json`);
+            logger.info(`Output file set to: ${outputFileName}.json`);
 
-        writer.write('[');
+            writer.write('[');
 
-        reader
-        .on('line', (line) => {
-            if (headerLine && headerFlag) {
-                headers = parseCSV(line);
-                headerLine = false;
-            }else if (headers.length === 0) {
-                for (let i = 0; i < line.length; i++) {
-                    headers[i] = `Column ${i}`;
-                }
-                if (firstLine) {
-                    lineCounter += 1;
-                    writer.write(convertToJSONObject(line, headers));
-                    firstLine = false;
+            reader
+            .on('line', (line) => {
+                if (headerLine && headerFlag) {
+                    headers = parseCSV(line);
+                    headerLine = false;
+                }else if (headers.length === 0) {
+                    for (let i = 0; i < line.length; i++) {
+                        headers[i] = `Column ${i}`;
+                    }
+                    if (firstLine) {
+                        lineCounter += 1;
+                        writer.write(convertToJSONObject(line, headers));
+                        firstLine = false;
+                    } else {
+                        lineCounter += 1;
+                        writer.write(', ' + convertToJSONObject(line, headers));
+                    }
                 } else {
-                    lineCounter += 1;
-                    writer.write(', ' + convertToJSONObject(line, headers));
+                    if (firstLine) {
+                        lineCounter += 1;
+                        writer.write(convertToJSONObject(line, headers));
+                        firstLine = false;
+                    } else {
+                        lineCounter += 1;
+                        writer.write(', ' + convertToJSONObject(line, headers));
+                    }
                 }
+            })
+            .on('close', () => {
+                writer.write(']');
+                writer.close();
+                logger.info(`Converted ${lineCounter} lines from CSV`)
+                logger.info('App closed');
+                resolve(true);
+            });
+        } catch (err) {
+            if (err instanceof Error) {
+                logger.error(err.message);
             } else {
-                if (firstLine) {
-                    lineCounter += 1;
-                    writer.write(convertToJSONObject(line, headers));
-                    firstLine = false;
-                } else {
-                    lineCounter += 1;
-                    writer.write(', ' + convertToJSONObject(line, headers));
-                }
+                logger.error('An unknown error occured');
             }
-        })
-        .on('close', () => {
-            writer.write(']');
-            writer.close();
-            logger.info(`Converted ${lineCounter} lines from CSV`)
-            logger.info('App closed');
-        });
-    } catch (err) {
-        if (err instanceof Error) {
-            logger.error(err.message);
-        } else {
-            logger.error('An unknown error occured');
         }
-    }
+    });
 }
 
 function convertToJSONObject(fileContents: string, headers: string[] = []) {

@@ -1,12 +1,12 @@
-import startClient from './client/client';
-import startServer from './server/server';
+import startClient from './src/client/client';
+import startServer from './src/server/server';
 import 'dotenv/config';
-import { AppDataSource } from './datasource';
+import { AppDataSource } from './src/datasource';
 import { DataSource } from 'typeorm';
 
 (async () => {
     try {
-        const tempDataSource = new DataSource ({
+        const tempDataSource = new DataSource({
             type: 'postgres',
             host: process.env.PG_HOST,
             port: Number(process.env.PG_PORT),
@@ -14,9 +14,9 @@ import { DataSource } from 'typeorm';
             password: process.env.PG_PASSWORD,
             database: 'postgres',
         });
-    
+
         await tempDataSource.initialize();
-    
+
         const dbExists = await tempDataSource.query(
             `SELECT datname FROM pg_database WHERE datname='${process.env.PG_DATABASE}'`
         );
@@ -33,7 +33,7 @@ import { DataSource } from 'typeorm';
 
         startServer();
         startClient();
-    } catch(err) {
+    } catch (err) {
         if (err instanceof Error) {
             console.log(err.message);
         } else {

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import LogService from './src/services/LogService';
+import LogService from './services/LogService';
 
 export default class Logger {
     cache: string;

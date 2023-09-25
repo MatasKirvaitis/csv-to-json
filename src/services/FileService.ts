@@ -1,5 +1,5 @@
 import { DeleteResult } from 'typeorm';
-import { AppDataSource } from '../../datasource';
+import { AppDataSource } from '../datasource';
 import { File, createDTO, findByUrlDTO } from '../entities/File';
 
 export default class FileService {

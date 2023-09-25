@@ -1,6 +1,6 @@
-import startServer from './server/server';
+import startServer from './src/server/server';
 import 'dotenv/config';
-import { AppDataSource } from './datasource';
+import { AppDataSource } from './src/datasource';
 import { DataSource } from 'typeorm';
 
 (async () => {

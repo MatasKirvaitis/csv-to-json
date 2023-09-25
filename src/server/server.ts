@@ -3,7 +3,7 @@ import Logger from '../logger';
 import csvToJSON from '../csvToJson';
 import fs from 'fs';
 import 'dotenv/config';
-import FileService from '../src/services/FileService';
+import FileService from '../services/FileService';
 
 const port = 1337;
 

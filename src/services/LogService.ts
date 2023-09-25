@@ -1,4 +1,4 @@
-import { AppDataSource } from '../../datasource';
+import { AppDataSource } from '../datasource';
 import { Log, createDTO } from '../entities/Log';
 import { DeleteResult, UpdateResult } from 'typeorm';
 

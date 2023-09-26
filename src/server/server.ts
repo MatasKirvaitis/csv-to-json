@@ -4,9 +4,6 @@ import csvToJSON from '../csvToJson';
 import fs from 'fs';
 import 'dotenv/config';
 import FileService from '../services/FileService';
-import readline from 'readline';
-
-const port = 1337;
 
 export default async function startServer() {
     const logger = new Logger('Server',
@@ -14,85 +11,14 @@ export default async function startServer() {
         process.env.SAVE_TO_DB === 'true' ? true : false);
 
     const server = http.createServer(async (request, response) => {
-        const fileService = new FileService();
+        const requestUrl = new URL(`http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}${request.url ?? ''}`);
 
-        if (request.url?.split('?')[0] === '/upload') {
-            if (request.method === 'POST' && request.headers['content-type'] === 'text/csv') {
-                let fileName: string;
-                let params = new URLSearchParams(request.url.split('?')[1]);
-
-                fileName = params.get('file') ?? `file_${Date.now()}`;
-
-                if (params.get('headers') === null || params.get('headers') === 'false') {
-                    params.set('headers', 'false');
-                }
-
-                const writeStream = fs.createWriteStream(`./filesInput/${fileName}.csv`);
-
-                request.on('data', chunk => {
-                    writeStream.write(chunk, err => {
-                        if (err) {
-                            response.writeHead(500, { 'Content-Type': 'text/plain' });
-                            response.end('File saving failed');
-                            logger.error(err.message);
-                        }
-                    });
-                })
-                    .on('end', () => {
-                        writeStream.close();
-                        let downloadURL = `http://localhost:${port}/download?file=${fileName}`;
-
-                        if (params.get('headers') === 'true') {
-                            csvToJSON(fileName, fileName, true)
-                                .then(() => {
-                                    return fileService.create({ url: downloadURL });
-                                });
-                        } else {
-                            csvToJSON(fileName, fileName, false)
-                                .then(() => {
-                                    return fileService.create({ url: downloadURL });
-                                });
-                        }
-
-                        response.writeHead(200, { 'Content-Type': 'text/plain' });
-                        response.end(`File is being converted and once done will be available at: ${downloadURL}`);
-                    })
-                    .on('error', err => {
-                        logger.error(err.message);
-                    });
-            } else {
-                response.writeHead(400, { 'Content-Type': 'text/plain' });
-                response.end('No valid CSV file found, please attach valid file and configure request headers');
-            }
-        } else if (request.url?.split('?')[0] === '/download') {
-            if (request.method === 'GET' && request.url.split('?').length !== 0) {
-                let params = new URLSearchParams(request.url.split('?')[1]);
-                let fileName = params.get('file') ?? '';
-                let foundFiles = await fileService.findAll({ url: fileName });
-
-                if (fileName == '' || foundFiles.length === 0) {
-                    response.writeHead(404, { 'Content-Type': 'text/plain' });
-                    response.end('File not found');
-                } else if (foundFiles.length >= 1) {
-                    const readStream = fs.createReadStream(`./filesOutput/${fileName}.json`);
-
-                    readStream.on('error', (err) => {
-                        logger.error(err.message);
-                        response.writeHead(404, { 'Content-Type': 'text/plain' });
-                        response.end(err.message);
-                    });
-
-                    response.writeHead(200, { 'Content-Type': 'application/json' });
-                    readStream.pipe(response);
-                }
-            } else {
-                response.writeHead(400, { 'Content-Type': 'text/plain' });
-                response.end('Invalid HTTP method used or valid arguments not passed');
-            }
+        if (requestUrl.pathname === '/upload') {
+            fileUpload(request, response, requestUrl, logger);
+        } else if (requestUrl.pathname === '/download') {
+            fileDownload(request, response, requestUrl, logger);
         } else {
-            response.writeHead(404, { 'Content-Type': 'text/plain' });
-            response.end('Endpoint not found');
-            logger.error(`Attempt to access non-existing endpoint ${request.url}`);
+            handleErrorResponse(response, 404, `Attempt to access non-existing endpoint ${request.url}`, logger);
         }
     });
 
@@ -128,5 +54,75 @@ export default async function startServer() {
         logger.error(err.message);
     });
 
-    server.listen(port, () => logger.info(`Server running on port ${port}`));
+    server.listen(process.env.SERVER_PORT, () => logger.info(`Server running on port ${process.env.SERVER_PORT}`));
+}
+
+function fileUpload(request: http.IncomingMessage, response: http.ServerResponse<http.IncomingMessage>, requestUrl: URL, logger: Logger) {
+    if (request.method !== 'POST' || request.headers['content-type'] !== 'text/csv') {
+        return handleErrorResponse(response, 400, 'Incorrect HTTP method or Content-Type', logger);
+    }
+    const requestParams = requestUrl.searchParams;
+    const fileName= requestParams.get('file') ?? `file_${Date.now()}`;
+    const fileService = new FileService();
+    const writeStream = fs.createWriteStream(`./filesInput/${fileName}.csv`);
+    const downloadURL = `http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}/download?file=${fileName}`;
+
+    if (requestParams.get('headers') === null || requestParams.get('headers') === 'false') {
+        requestParams.set('headers', 'false');
+    }
+
+    request.on('data', chunk => {
+        writeStream.write(chunk, err => {
+            if (err) {
+                handleErrorResponse(response, 500, err.message, logger);
+            }
+        });
+    }).on('end', () => {
+        writeStream.close();
+        if (requestParams.get('headers') === 'true') {
+            csvToJSON(fileName, fileName, true)
+                .then(() => {
+                    return fileService.create({ url: downloadURL });
+                });
+        } else {
+            csvToJSON(fileName, fileName, false)
+                .then(() => {
+                    return fileService.create({ url: downloadURL });
+                });
+        }
+
+        response.writeHead(200, { 'Content-Type': 'text/plain' });
+        response.end(`File is being converted and once done will be available at: ${downloadURL}`);
+    }).on('error', err => {
+        logger.error(err.message);
+    });
+}
+
+async function fileDownload(request: http.IncomingMessage, response: http.ServerResponse<http.IncomingMessage>, requestUrl: URL, logger: Logger) {
+    if (request.method !== 'GET' || requestUrl.searchParams.size === 0) {
+        return handleErrorResponse(response, 400, 'Invalid HTTP method used or valid arguments not passed', logger);
+    }
+
+    const fileService = new FileService();
+    const fileName = requestUrl.searchParams.get('file') ?? '';
+    const foundFiles = await fileService.findAll({ url: fileName });
+
+    if (fileName == '' || foundFiles.length === 0) {
+        handleErrorResponse(response, 404, 'File not found', logger);
+    } else {
+        const readStream = fs.createReadStream(`./filesOutput/${fileName}.json`);
+
+        readStream.on('error', (err) => {
+            handleErrorResponse(response, 404, err.message, logger);
+        });
+
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        readStream.pipe(response);
+    }
+}
+
+function handleErrorResponse(response: http.ServerResponse<http.IncomingMessage>, statusCode: number, message: string, logger: Logger) {
+    response.writeHead(statusCode, { 'Content-Type': 'text/plain' });
+    response.end(message);
+    logger.error(message);
 }

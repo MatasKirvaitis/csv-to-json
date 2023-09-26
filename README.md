@@ -17,7 +17,9 @@ csv-to-json is a simple application to convert CSV files to JSON.
    `PG_PORT - port for the PSQL database`  
    `PG_USER - PSQL user's username`  
    `PG_PASSWORD - PSQL user's password`  
-   `PG_DATABASE - PSQL database name`
+   `PG_DATABASE - PSQL database name`  
+   `SERVER_PORT - port to host server on`  
+   `SERVER_HOST - server hostname`  
 
 7. Place CSV file you want to convert into "filesInput".
 8. In terminal run: docker-compose up

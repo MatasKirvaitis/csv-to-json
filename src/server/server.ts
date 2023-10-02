@@ -4,6 +4,7 @@ import csvToJSON from '../csvToJson';
 import fs from 'fs';
 import 'dotenv/config';
 import FileService from '../services/FileService';
+import { fork } from 'child_process';
 
 export default async function startServer() {
     const logger = new Logger('Server',
@@ -62,8 +63,7 @@ function fileUpload(request: http.IncomingMessage, response: http.ServerResponse
         return handleErrorResponse(response, 400, 'Incorrect HTTP method or Content-Type', logger);
     }
     const requestParams = requestUrl.searchParams;
-    const fileName= requestParams.get('file') ?? `file_${Date.now()}`;
-    const fileService = new FileService();
+    const fileName = requestParams.get('file') ?? `file_${Date.now()}`;
     const writeStream = fs.createWriteStream(`./filesInput/${fileName}.csv`);
     const downloadURL = `http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}/download?file=${fileName}`;
 
@@ -80,15 +80,9 @@ function fileUpload(request: http.IncomingMessage, response: http.ServerResponse
     }).on('end', () => {
         writeStream.close();
         if (requestParams.get('headers') === 'true') {
-            csvToJSON(fileName, fileName, true)
-                .then(() => {
-                    return fileService.create({ url: downloadURL });
-                });
+            childProcessCsvToJSON(fileName, fileName, true, downloadURL);
         } else {
-            csvToJSON(fileName, fileName, false)
-                .then(() => {
-                    return fileService.create({ url: downloadURL });
-                });
+            childProcessCsvToJSON(fileName, fileName, false, downloadURL);
         }
 
         response.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -125,4 +119,27 @@ function handleErrorResponse(response: http.ServerResponse<http.IncomingMessage>
     response.writeHead(statusCode, { 'Content-Type': 'text/plain' });
     response.end(message);
     logger.error(message);
+}
+
+function childProcessCsvToJSON(inputName: string, outputName: string, headerFlag: boolean, downloadURL: string, loggerFlag: boolean = true, dbFlag: boolean = true): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const child = fork('./src/csvToJsonChildProcess.ts');
+
+        child.send({
+            inputName,
+            outputName,
+            headerFlag,
+            loggerFlag,
+            dbFlag,
+            downloadURL
+        });
+
+        child.on('message', (message: { success: boolean, error?: string }) => {
+            if (message.success) {
+                resolve();
+            } else {
+                reject(new Error(message.error));
+            }
+        });
+    });
 }

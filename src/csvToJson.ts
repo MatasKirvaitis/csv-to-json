@@ -1,11 +1,9 @@
 import fs from 'fs';
-import { argv } from 'node:process';
 import readline from 'readline';
 import Logger from './logger';
 
-export default function csvToJSON(inputFileName: string, outputFileName: string, headerFlag: boolean, loggerFlag: boolean = true, dbFlag: boolean = true): Promise<boolean> {
-    return new Promise((resolve) => {
-        const args: string[] = argv.splice(2);
+export default function csvToJSON(inputFileName: string, outputFileName: string, headerFlag: boolean, loggerFlag: boolean = true, dbFlag: boolean = true): Promise<void> {
+    return new Promise((resolve, reject) => {
         let headerLine: boolean = true;
         let headers: string[] = [];
         let firstLine = true;
@@ -68,14 +66,10 @@ export default function csvToJSON(inputFileName: string, outputFileName: string,
                     writer.close();
                     logger.info(`Converted ${lineCounter} lines from CSV`)
                     logger.info('App closed');
-                    resolve(true);
+                    resolve();
                 });
         } catch (err) {
-            if (err instanceof Error) {
-                logger.error(err.message);
-            } else {
-                logger.error('An unknown error occured');
-            }
+            reject(err);
         }
     });
 }
